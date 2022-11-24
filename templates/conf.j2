@@ -1,0 +1,309 @@
+{{ ansible_managed | comment }}
+## Authoritative, validating, recursive caching DNS
+## unbound.conf -- Template taken from: https://calomel.org
+
+server:
+    # The  verbosity  number, level 0 means no verbosity, only errors.
+    # Level 1 gives operational information. Level  2  gives  detailed
+    # operational  information. Level 3 gives query level information,
+    # output per query.  Level 4 gives  algorithm  level  information.
+    # Level 5 logs client identification for cache misses.  Default is
+    # level 1.
+    verbosity: {{ unbound_verbosity }}
+{% for iface in unbound_interfaces %}
+    interface: {{ iface }}
+{% endfor %}
+
+    # port to answer queries from
+    port: {{ unbound_dns_port }}
+
+    # Enable IPv4, "yes" or "no".
+    do-ip4: {{ unbound_do_ipv4 }}
+
+    # Enable IPv6, "yes" or "no".
+    do-ip6: {{ unbound_do_ipv6 }}
+
+    # Enable UDP, "yes" or "no".
+    do-udp: {{ unbound_do_udp }}
+
+    # Enable TCP, "yes" or "no". If TCP is not needed, Unbound is actually
+    # quicker to resolve as the functions related to TCP checks are not done.
+    # NOTE: you may need tcp enabled to get the DNSSEC results from *.edu domains
+    # due to their size.
+    do-tcp: {{ unbound_do_tcp }}
+
+    # You want to leave this to no unless you have *native* IPv6. With 6to4 and
+    # Terredo tunnels your web browser should favor IPv4 for the same reasons
+    prefer-ip6: {{ unbound_prefer_ipv6 }}
+
+    # Use this only when you downloaded the list of primary root servers!
+    # Read the root  hints from this file. Make sure to
+    # update root.hints every 5-6 months.
+    # root hints are included in unbound
+    # root-hints: "/var/lib/unbound/root.hints"
+
+    # Trust glue only if it is within the servers authority
+    harden-glue: yes
+
+    # Ignore very large queries.
+    harden-large-queries: yes
+
+    # Require DNSSEC data for trust-anchored zones, if such data is absent, the zone becomes BOGUS
+    # If you want to disable DNSSEC, set harden-dnssec stripped: no
+    harden-dnssec-stripped: yes
+
+    # RFC 6891. Number  of bytes size to advertise as the EDNS reassembly buffer
+    # size. This is the value put into  datagrams over UDP towards peers.
+    # The actual buffer size is determined by msg-buffer-size (both for TCP and
+    # UDP). Do not set higher than that value.
+    # Default  is  1232 which is the DNS Flag Day 2020 recommendation.
+    # Setting to 512 bypasses even the most stringent path MTU problems, but
+    # is seen as extreme, since the amount of TCP fallback generated is
+    # excessive (probably also for this resolver, consider tuning the outgoing
+    # tcp number).
+    edns-buffer-size: 1232
+
+    # Rotates RRSet order in response (the pseudo-random
+    # number is taken from Ensure privacy of local IP
+    # ranges the query ID, for speed and thread safety).
+    # private-address: 192.168.0.0/16
+    rrset-roundrobin: yes
+
+    # Time to live minimum for RRsets and messages in the cache. If the minimum
+    # kicks in, the data is cached for longer than the domain owner intended,
+    # and thus less queries are made to look up the data. Zero makes sure the
+    # data in the cache is as the domain owner intended, higher values,
+    # especially more than an hour or so, can lead to trouble as the data in
+    # the cache does not match up with the actual data anymore
+    cache-min-ttl: 300
+    cache-max-ttl: 86400
+
+    # Have unbound attempt to serve old responses from cache with a TTL of 0 in
+    # the response without waiting for the actual resolution to finish. The
+    # actual resolution answer ends up in the cache later on.
+    serve-expired: yes
+
+    # Harden against algorithm downgrade when multiple algorithms are
+    # advertised in the DS record.
+    harden-algo-downgrade: yes
+
+    # Ignore very small EDNS buffer sizes from queries.
+    harden-short-bufsize: yes
+
+    # Refuse id.server and hostname.bind queries
+    hide-identity: yes
+
+    # Report this identity rather than the hostname of the server.
+    identity: "DNS"
+
+    # Refuse version.server and version.bind queries
+    hide-version: yes
+
+    # Prevent the unbound server from forking into the background as a daemon
+    do-daemonize: no
+
+    # Number  of  bytes size of the aggressive negative cache.
+    neg-cache-size: 4M
+
+    # Send minimum amount of information to upstream servers to enhance privacy
+    qname-minimisation: yes
+
+    # Deny queries of type ANY with an empty response.
+    # Works only on version 1.8 and above
+    deny-any: yes
+
+    # Use 0x20-encoded random bits in the query to foil spoof attempts.
+    # http://tools.ietf.org/html/draft-vixie-dnsext-dns0x20-00
+    # While upper and lower case letters are allowed in domain names, no significance
+    # is attached to the case. That is, two names with the same spelling but
+    # different case are to be treated as if identical. This means calomel.org is the
+    # same as CaLoMeL.Org which is the same as CALOMEL.ORG.
+    use-caps-for-id: yes
+
+    # Do no insert authority/additional sections into response messages when
+    # those sections are not required. This reduces response size
+    # significantly, and may avoid TCP fallback for some responses. This may
+    # cause a slight speedup
+    minimal-responses: yes
+
+    # Perform prefetching of close to expired message cache entries
+    # This only applies to domains that have been frequently queried
+    # This flag updates the cached domains
+    prefetch: yes
+
+    # Fetch the DNSKEYs earlier in the validation process, when a DS record is
+    # encountered. This lowers the latency of requests at the expense of little
+    # more CPU usage.
+    prefetch-key: yes
+
+    # One thread should be sufficient, can be increased on beefy machines. In reality for
+    # most users running on small networks or on a single machine, it should be unnecessary
+    # to seek performance enhancement by increasing num-threads above 1.
+    num-threads: 1
+
+    # more cache memory. rrset-cache-size should twice what msg-cache-size is.
+    msg-cache-size: 50m
+    rrset-cache-size: 100m
+
+    # Faster UDP with multithreading (only on Linux).
+    so-reuseport: yes
+
+    # Ensure kernel buffer is large enough to not lose messages in traffix spikes
+    so-rcvbuf: 4m
+    so-sndbuf: 4m
+
+    # Set the total number of unwanted replies to keep track of in every thread.
+    # When it reaches the threshold, a defensive action of clearing the rrset
+    # and message caches is taken, hopefully flushing away any poison.
+    # Unbound suggests a value of 10 million.
+    unwanted-reply-threshold: 100000
+
+    # Minimize logs
+    # log-identity: <string>
+    # log-time-ascii: <yes or no>
+    log-queries: {{ unbound_log_queries }}
+    log-replies: {{ unbound_log_replies }}
+    log-tag-queryreply: {{ unbound_log_tag_queryreply }}
+    log-local-actions: {{ unbound_log_local_actions }}
+    log-servfail: {{ unbound_log_servfail }}
+
+    # Do not print log lines to inform about local zone actions
+    #log-local-actions: no
+    # Do not print log lines that say why queries return SERVFAIL to clients
+    #logfile: "/etc/unbound/unbound.log"
+
+    # control which client ips are allowed to make (recursive) queries to this
+    # server. Specify classless netblocks with /size and action.  By default
+    # everything is refused, except for localhost.  Choose deny (drop message),
+    # refuse (polite error reply), allow (recursive ok), allow_snoop (recursive
+    # and nonrecursive ok)
+
+{% if unbound_additional_access_controls is defined %}
+{% for access_control in unbound_additional_access_controls | list %}
+    access-control: {{ "%s %s" % (access_control.cidr_range, access_control.action) }}
+{% endfor %}
+{% endif %}
+
+    # Enforce privacy of these addresses. Strips them away from answers.  It may
+    # cause DNSSEC validation to additionally mark it as bogus.  Protects against
+    # 'DNS Rebinding' (uses browser as network proxy).  Only 'private-domain' and
+    # 'local-data' names are allowed to have these private addresses. No default.
+    # Ensure privacy of local IP ranges
+    private-address: 192.168.0.0/16
+    private-address: 169.254.0.0/16
+    private-address: 172.16.0.0/12
+    private-address: 10.0.0.0/8
+    private-address: fd00::/8
+    private-address: fe80::/10
+
+    # Allow the domain (and its subdomains) to contain private addresses.
+    # local-data statements are allowed to contain private addresses too.
+    private-domain: "home.lan"
+
+    # If nonzero, unwanted replies are not only reported in statistics, but also
+    # a running total is kept per thread. If it reaches the threshold, a warning
+    # is printed and a defensive action is taken, the cache is cleared to flush
+    # potential poison out of it.  A suggested value is 10000000, the default is
+    # 0 (turned off). We think 10K is a good value.
+    unwanted-reply-threshold: 10000
+
+    # IMPORTANT FOR TESTING: If you are testing and setup NSD or BIND  on
+    # localhost you will want to allow the resolver to send queries to localhost.
+    # Make sure to set do-not-query-localhost: yes. If yes, the above default
+    # do-not-query-address entries are present.  if no, localhost can be queried
+    # (for testing and debugging).
+    do-not-query-localhost: no
+
+    # Should additional section of secure message also be kept clean of unsecure
+    # data. Useful to shield the users of this validator from potential bogus
+    # data in the additional section. All unsigned data in the additional section
+    # is removed from secure messages.
+    val-clean-additional: yes
+
+    # Blocking Ad Server domains. Google's AdSense, DoubleClick and Yahoo
+    # account for a 70 percent share of all advertising traffic. Block them.
+    local-zone: "doubleclick.net" redirect
+    local-data: "doubleclick.net A 127.0.0.1"
+    local-zone: "googlesyndication.com" redirect
+    local-data: "googlesyndication.com A 127.0.0.1"
+    local-zone: "googleadservices.com" redirect
+    local-data: "googleadservices.com A 127.0.0.1"
+    local-zone: "google-analytics.com" redirect
+    local-data: "google-analytics.com A 127.0.0.1"
+    local-zone: "ads.youtube.com" redirect
+    local-data: "ads.youtube.com A 127.0.0.1"
+    local-zone: "adserver.yahoo.com" redirect
+    local-data: "adserver.yahoo.com A 127.0.0.1"
+    local-zone: "ask.com" redirect
+    local-data: "ask.com A 127.0.0.1"
+
+    # locally served zones can be configured for the machines on the LAN.
+
+    # Unbound can query your NSD or BIND server for private domain queries too.
+    # On our NSD page we have NSD configured to serve the private domain,
+    # "home.lan". Here we can tell Unbound to connect to the NSD server when it
+    # needs to resolve a *.home.lan hostname or IP.
+    #
+
+    # private-domain: "home.lan"
+    # local-zone: "0.0.10.in-addr.arpa." nodefault
+    # stub-zone:
+    #   name: "home.lan"
+    #   stub-addr: 10.0.0.111@53
+
+{% if unbound_private_domains %}
+{% for domain in unbound_private_domains %}
+    private-domain: {{ domain }}
+{% endfor %}
+{% endif %}
+
+{% if unbound_local_zones %}
+{% for local_zone in unbound_local_zones %}
+    local-zone: {{ local_zone }}
+{% endfor %}
+{% endif %}
+
+{% if unbound_stub_zones %}
+{% for stub_zone in unbound_stub_zones %}
+    stub-zone:
+      name: {{ stub_zone.name }}
+      stub-addr: {{ stub_zone.addr }}
+{% endfor %}
+{% endif %}
+
+    # If you have an internal or private DNS names the external DNS servers can
+    # not resolve, then you can assign domain name strings to be redirected to a
+    # separate dns server. For example, our company has the domain
+    # organization.com and the domain name internal.organization.com can not be
+    # resolved by Google's public DNS, but can be resolved by our private DNS
+    # server located at 1.1.1.1. The following tells Unbound that any
+    # organization.com domain, i.e. *.organization.com be dns resolved by 1.1.1.1
+    # instead of the public dns servers.
+
+    # forward-zone:
+    #    name: "organization.com"
+    #    forward-addr: 1.1.1.1        # Internal or private DNS
+
+    # Use the following forward-zone to forward all queries to Google DNS,
+    # OpenDNS.com or your local ISP's dns servers for example. To test resolution
+    # speeds use "drill calomel.org @8.8.8.8" and look for the "Query time:" in
+    # milliseconds.
+    #
+
+{% for zone in unbound_forward_zones %}
+{% if zone %}
+    forward-zone:
+        name: {{ zone.name }}
+{% if zone.forward_addrs %}
+{% for addr in zone.forward_addrs %}
+        forward-addr: {{ addr }}
+{% endfor %}
+{% endif %}
+
+{% if zone.forward_hosts %}
+{% for addr in zone.forward_hosts %}
+        forward-host: {{ addr }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}

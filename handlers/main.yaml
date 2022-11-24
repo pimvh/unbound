@@ -1,0 +1,16 @@
+---
+- name: Restart and enable Unbound service
+  systemd:
+    name: unbound
+    state: restarted
+    enabled: true
+  become: true
+  listen: "restart unbound"
+
+- name: Restart and enable systemd-resolved service
+  systemd:
+    name: systemd-resolved
+    state: restarted
+    enabled: true
+  become: true
+  listen: "restart systemd-resolved"

@@ -1,0 +1,26 @@
+---
+- name: Verify that required variables are defined
+  assert:
+    that:
+      - "item is defined"
+      - "item | length > 0"
+      - "item != None"
+    fail_msg: "{{ item }} needs to be set for the role to work"
+    success_msg: "Required variable {{ item }} is defined"
+  changed_when: false
+  diff: false
+  loop:
+    - "{{ unbound_do_ipv4 }}"
+    - "{{ unbound_do_ipv6 }}"
+    - "{{ unbound_dns_port }}"
+    - "{{ unbound_do_ipv4 }}"
+    - "{{ unbound_do_ipv6 }}"
+    - "{{ unbound_prefer_ipv6 }}"
+    - "{{ unbound_do_udp }}"
+    - "{{ unbound_do_tcp }}"
+    - "{{ unbound_additional_access_controls }}"
+    - "{{ unbound_test_domain }}"
+    # - "{{ unbound_forward_zones }}"
+  tags:
+    - unbound_install
+    - unbound_update
