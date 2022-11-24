@@ -5,6 +5,8 @@
     apply:
       delegate_to: localhost
       run_once: true
+  tags:
+    - unbound_assert
 
 - name: Install Unbound Package
   package:
