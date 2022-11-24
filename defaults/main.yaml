@@ -4,8 +4,6 @@ unbound_test_domain: google.com
 
 # probably move to host var
 unbound_interfaces:
-  - "{{ wg_range_v6 | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('1') | split('/') | first }}"
-  - "{{ wg_range_v4 | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('1') | split('/') | first }}"
   - "127.0.0.1"
   - "::1"
 
