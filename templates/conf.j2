@@ -200,6 +200,14 @@ server:
     # local-data statements are allowed to contain private addresses too.
     private-domain: "home.lan"
 
+{% if unbound_stub_zones %}
+{% for stub_zone in unbound_stub_zones %}
+{% if stud_zone.secure is sameas false %}
+    domain-insecure: "{{ stub_zone.name }}"
+{% endif %}
+{% endfor %}
+{% endif %}
+
     # If nonzero, unwanted replies are not only reported in statistics, but also
     # a running total is kept per thread. If it reaches the threshold, a warning
     # is printed and a defensive action is taken, the cache is cleared to flush
@@ -259,7 +267,7 @@ server:
 
 {% if unbound_local_zones %}
 {% for local_zone in unbound_local_zones %}
-    local-zone: {{ local_zone }}
+    local-zone: "{{ local_zone.name }}" {{ local_zone.type }}
 {% endfor %}
 {% endif %}
 
