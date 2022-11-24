@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Pim van Helvoirt
-  description: "role to configure nftables using a YAML file"
+  description: "role to configure unbound"
 
   license: GPL-3.0-only
 
@@ -16,8 +16,7 @@ galaxy_info:
         - bullseye
 
   galaxy_tags:
-    - firewall
-    - nftables
+    - unbound
+    - resolver
 
-dependencies:
-  - role: pimvh.systemd_failmail
+dependencies: []
