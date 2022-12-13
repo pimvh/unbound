@@ -59,8 +59,37 @@ unbound_additional_access_controls:
     action: allow
 
 unbound_local_zones: []
+
+# or with values;
+# unbound_local_zones:
+#   - name: mydomain.lan
+#     type: nodefault
+#   - name: .10.in-addr.arpa.
+#     type: nodefault'
+
 unbound_stub_zones: []
+# or with values:
+# unbound_stub_zones:
+#   - name: "mydomain.lan"
+#     secure: false
+#     addr: "<< ip addr >>@53"
+
 unbound_forward_zones: {}
+
+
+# or with values:
+# unbound_forward_zones:
+# dot configure everything else
+#   - name: "<< zone name to forward >>"
+#     forward_addrs: []
+#     forward_hosts:
+#       - # host to forward to
+#   - name: "."  # or forward everthing like t
+#     either can be empty
+#     forward_addrs:
+#       - # to these addresses
+#     forward_hosts:
+#       - # or hosts
 ```
 
 The ansible playbook will validate whether the variables exist that you defined before running.
