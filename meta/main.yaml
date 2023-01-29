@@ -18,5 +18,6 @@ galaxy_info:
   galaxy_tags:
     - unbound
     - resolver
+    - dnssec
 
 dependencies: []
