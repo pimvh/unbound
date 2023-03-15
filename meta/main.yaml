@@ -19,5 +19,167 @@ galaxy_info:
     - unbound
     - resolver
     - dnssec
+    - roothints
 
 dependencies: []
+
+argument_specs:
+  main:
+    short_description: The main entry point for the unbound role.
+    description: |
+      This entrypoint configures the unbound service.
+    options:
+      unbound_install:
+        type: bool
+        required: false
+        default: true
+        description: "Whether to install Unbound"
+      unbound_test_domain:
+        type: str
+        required: false
+        default: google.com
+        description: "Test domain to test DNS resolution with"
+      unbound_directory:
+        type: str
+        required: false
+        default: /etc/unbound
+        description: directory to configure unbound in
+      unbound_root_hints_url:
+        type: str
+        required: false
+        default: https://www.internic.net/domain/named.cache
+        description: URL to retrieve root hints from
+      unbound_root_hints_interval:
+        type: str
+        required: false
+        default: monthly
+        description: interal at which to retrieve roothints
+      unbound_dns_port:
+        type: str
+        required: false
+        default: "53"
+        description: "Port to run DNS on"
+      unbound_do_ipv4:
+        type: str
+        required: false
+        default: "yes"
+        description: "Whether to do IPv4"
+      unbound_do_ipv6:
+        type: str
+        required: false
+        default: "yes"
+        description: "Whether to do IPv6"
+      unbound_forward_tls_upstream:
+        type: str
+        required: false
+        default: "no"
+        description: "Whether to forward TLS upstream (see Unbound docs)"
+      unbound_prefer_ipv6:
+        type: str
+        required: false
+        default: "yes"
+        description: "Whether to prefer IPv6 (see Unbound docs)"
+      unbound_do_tcp:
+        type: str
+        required: false
+        default: "yes"
+        description: "Whether to enable TCP (see Unbound docs)"
+      unbound_do_udp:
+        type: str
+        required: false
+        default: "yes"
+        description: "Whether to enable UDP (see Unbound docs)"
+      unbound_verbosity:
+        type: str
+        required: false
+        default: "0"
+        description: "Unbound verbosity level (see Unbound docs)"
+      unbound_log_queries:
+        type: str
+        required: false
+        default: "no"
+        description: "Whether queries are logged (see Unbound docs)"
+      unbound_log_replies:
+        type: str
+        required: false
+        default: "no"
+        description: "Whether replies are logged (see Unbound docs)"
+      unbound_log_tag_queryreply:
+        type: str
+        required: false
+        default: "no"
+        description: "Whether to log tag query replies (see Unbound docs)"
+      unbound_log_local_actions:
+        type: str
+        required: false
+        default: "no"
+        description: "Whether local actions are logged (see Unbound docs)"
+      unbound_log_servfail:
+        type: str
+        required: false
+        default: "no"
+        description: "Whether servfails are logged (see Unbound docs)"
+      unbound_private_domains:
+        type: list
+        required: false
+        default:
+          - home.lan
+        description: "Whether servfails are logged (see Unbound docs)"
+        elements: str
+      unbound_additional_access_controls:
+        type: list
+        required: false
+        default:
+          - cidr_range: 10.0.0.0/8
+            action: allow
+          - cidr_range: 127.0.0.0/8
+            action: allow
+          - cidr_range: 127.0.0.1/32
+            action: allow
+          - cidr_range: 172.16.0.0/12
+            action: allow
+          - cidr_range: 192.168.0.0/16
+            action: allow
+          - cidr_range: fc00::/7
+            action: allow
+          - cidr_range: ::1/128
+            action: allow
+        description: "Which CIDR ranges are allowed to query he resolver"
+        elements: dict
+      unbound_local_zones:
+        type: list
+        required: false
+        default: []
+        description: "Configures local zones (see Unbound docs)"
+        elements: dict
+      unbound_local_data:
+        type: list
+        required: false
+        default: []
+        description: "Configures local data (see Unbound docs)"
+        elements: dict
+        options:
+          id:
+            type: str
+            description: the domain in the record
+            required: true
+          type:
+            type: str
+            description: the type of the record
+            required: true
+          record:
+            type: str
+            description: the content of the record
+            required: true
+      unbound_stub_zones:
+        type: list
+        required: false
+        default: []
+        description: "Configures stub zones (see Unbound docs)"
+        elements: dict
+      unbound_forward_zones:
+        type: list
+        required: false
+        default: {}
+        description: "Configures forward zones (see Unbound docs)"
+        elements: dict
