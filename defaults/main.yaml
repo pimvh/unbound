@@ -1,6 +1,10 @@
 ---
 unbound_install: true
 unbound_test_domain: google.com
+unbound_directory: /etc/unbound
+
+unbound_root_hints_url: https://www.internic.net/domain/named.cache
+unbound_root_hints_interval: monthly
 
 # probably move to host var
 unbound_interfaces:
@@ -41,5 +45,6 @@ unbound_additional_access_controls:
     action: allow
 
 unbound_local_zones: []
+unbound_local_data: []
 unbound_stub_zones: []
 unbound_forward_zones: {}

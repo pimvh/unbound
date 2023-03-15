@@ -14,3 +14,20 @@
     enabled: true
   become: true
   listen: "restart systemd-resolved"
+
+
+- name: Just force systemd to reread configs (2.4 and above)
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  listen: reload systemd
+
+- name: Enable roothints timer service
+  ansible.builtin.systemd:
+    name: roothints.timer
+    state: started
+    daemon_reload: true
+    enabled: true
+  become: true
+  listen: enable roothints timer
+  ignore_errors: "{{ ansible_check_mode }}"

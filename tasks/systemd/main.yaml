@@ -1,0 +1,71 @@
+---
+- name: Make systemd services roothints
+  block:
+    - name: Move roothints systemd timer file to host
+      ansible.builtin.template:
+        src: systemd/roothints.timer.j2
+        dest: "/etc/systemd/system/roothints.timer"
+        # validate: "systemd-analyze verify %s"
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+      become: true
+      notify:
+        - reload systemd
+        - enable roothints timer
+
+    - name: Move roothints.service systemd file to host
+      ansible.builtin.template:
+        src: systemd/roothints.service.j2
+        dest: "/etc/systemd/system/roothints.service"
+        # validate: "systemd-analyze verify %s"
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+      become: true
+      notify:
+        - reload systemd
+
+    - name: Validate roothints.service
+      ansible.builtin.command: systemd-analyze verify roothints.service
+      args:
+        chdir: "/etc/systemd"
+      changed_when: false
+      become: true
+
+    - name: Validate roothints.timer
+      ansible.builtin.command: systemd-analyze verify roothints.timer
+      args:
+        chdir: "/etc/systemd"
+      changed_when: false
+      become: true
+
+- name: Run roothints service when roothints file is not present
+  block:
+    - name: Check if certs are present
+      ansible.builtin.stat:
+        path: "{{ unbound_directory }}/root.hints"
+      register: roothints
+      become: true
+
+    - name: Flush handlers (to allow to execute freshly created service)
+      ansible.builtin.meta: flush_handlers
+      when: not roothints.stat.exists
+
+    - name: Run roothints service to fetch hints
+      ansible.builtin.service:
+        name: roothints.service
+        state: started
+      become: true
+      when: not roothints.stat.exists
+      ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Edit systemd-resolved settings
+  template:
+    src: systemd/resolved.conf.j2
+    dest: /etc/systemd/resolved.conf
+    mode: u=rw,g=r,o=r
+    owner: root
+    group: root
+  become: true
+  notify: restart systemd-resolved

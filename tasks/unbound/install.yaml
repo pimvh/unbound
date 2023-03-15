@@ -1,0 +1,10 @@
+---
+- name: Install Unbound Package
+  package:
+    name:
+      - unbound
+      - unbound-anchor
+      - dnsutils
+    state: present
+  when: unbound_install
+  become: true

@@ -1,0 +1,8 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Update root hints for unbound
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/curl -o {{ unbound_directory }}/root.hints {{ unbound_root_hints_url }}

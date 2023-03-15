@@ -1,53 +1,33 @@
 ---
-- name: Assert required variables for role are defined
+- name: Install package
   ansible.builtin.include_tasks:
-    file: assert.yaml
+    file: unbound/install.yaml
     apply:
-      delegate_to: localhost
-      run_once: true
-  tags:
-    - unbound_assert
+      tags:
+        - unbound_install
+  tags: unbound_install
 
-- name: Install Unbound Package
-  package:
-    name:
-      - unbound
-      - unbound-anchor
-      - dnsutils
-    state: present
-  when: unbound_install
-  become: true
-  tags:
-    - unbound_install
-
-- name: Copy Unbound config file
-  template:
-    src: conf.j2
-    dest: "/etc/unbound/unbound.conf.d/unbound.conf"
-    validate: "/usr/sbin/unbound-checkconf %s"
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-  become: true
-  notify: restart unbound
-  tags:
-    - unbound_update
-
-- name: Edit systemd-resolved settings
-  template:
-    src: resolved.conf
-    dest: /etc/systemd/resolved.conf
-    mode: u=rw,g=r,o=r
-    owner: root
-    group: root
-  become: true
-  notify: restart systemd-resolved
+- name: Configure required systemd
+  ansible.builtin.include_tasks:
+    file: systemd/main.yaml
+    apply:
+      tags:
+        - unbound_setup
   tags:
     - unbound_setup
 
+- name: Configure unbound
+  ansible.builtin.include_tasks:
+    file: unbound/configure.yaml
+    apply:
+      tags:
+        - unbound_update
+  tags:
+    - unbound_update
+
 # verify output of command in a better way
 - name: Verify unbound is working correctly
-  command: dig {{ unbound_test_domain }}
-  changed_when: false
+  ansible.builtin.command: drill {{ unbound_test_domain }}
+  changed_when: true
   tags:
     - unbound_update

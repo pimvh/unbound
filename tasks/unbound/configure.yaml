@@ -1,0 +1,11 @@
+---
+- name: Copy Unbound config file
+  template:
+    src: unbound/conf.j2
+    dest: "{{ unbound_directory }}/unbound.conf.d/unbound.conf"
+    validate: "/usr/sbin/unbound-checkconf %s"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+  notify: restart unbound
