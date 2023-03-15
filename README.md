@@ -92,7 +92,7 @@ unbound_forward_zones: {}
 #       - # or hosts
 ```
 
-The ansible playbook will validate whether the variables exist that you defined before running.
+The Ansible playbook will validate whether the variables exist that you defined before running.
 
 # Example playbook
 
@@ -106,13 +106,14 @@ roles:
 
 # TLDR - What will happen if I run this
 
-- validate whether rules/some other variables are defined
-- install unbound, when unbound_install
-- push config
-- point systemd-resolved of that system to unbound first
-- verify whether Unbound resolved a domain
+- validate whether rules/some other variables are defined.
+- create service that monthly pulls in the root hints.
+- install unbound, when unbound_install.
+- push config.
+- point systemd-resolved of that system to unbound first.
+- verify whether Unbound resolved a domain.
 
-# Future Improvements
+# Sources
 
-- Fetching roothints file
-- Adding more variables to be set via Ansible
+- [Archlinux wiki on fetching root hints](https://wiki.archlinux.org/title/Unbound)
+- [calomel.org for unbound configuration template](https://calomel.org)
