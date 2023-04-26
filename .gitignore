@@ -1,2 +1,4 @@
-.DS_store
-todo.txt
+# terraform managed
+*.pyc
+__pycache__
+venv/
