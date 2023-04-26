@@ -5,7 +5,7 @@ galaxy_info:
 
   license: GPL-3.0-only
 
-  min_ansible_version: 2.1
+  min_ansible_version: "2.14"
 
   platforms:
     - name: Ubuntu
@@ -34,11 +34,6 @@ argument_specs:
         required: false
         default: true
         description: "Whether to install Unbound"
-      unbound_test_domain:
-        type: str
-        required: false
-        default: google.com
-        description: "Test domain to test DNS resolution with"
       unbound_directory:
         type: str
         required: false

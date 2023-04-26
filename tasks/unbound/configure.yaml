@@ -1,6 +1,6 @@
 ---
 - name: Copy Unbound config file
-  template:
+  ansible.builtin.template:
     src: unbound/conf.j2
     dest: "{{ unbound_directory }}/unbound.conf.d/unbound.conf"
     validate: "/usr/sbin/unbound-checkconf %s"

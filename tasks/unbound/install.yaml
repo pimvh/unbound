@@ -1,10 +1,12 @@
 ---
 - name: Install Unbound Package
-  package:
+  ansible.builtin.package:
     name:
       - unbound
       - unbound-anchor
       - dnsutils
+      - ldnsutils
+      - curl
     state: present
   when: unbound_install
   become: true

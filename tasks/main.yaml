@@ -24,10 +24,3 @@
         - unbound_update
   tags:
     - unbound_update
-
-# verify output of command in a better way
-- name: Verify unbound is working correctly
-  ansible.builtin.command: drill {{ unbound_test_domain }}
-  changed_when: true
-  tags:
-    - unbound_update
