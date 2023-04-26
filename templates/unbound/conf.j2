@@ -389,13 +389,13 @@ server:
 {% if zone %}
     forward-zone:
         name: {{ zone.name }}
-{% if zone.forward_addrs %}
+{% if zone.forward_addrs is defined %}
 {% for addr in zone.forward_addrs %}
         forward-addr: {{ addr }}
 {% endfor %}
 {% endif %}
 
-{% if zone.forward_hosts %}
+{% if zone.forward_hosts is defined %}
 {% for addr in zone.forward_hosts %}
         forward-host: {{ addr }}
 {% endfor %}

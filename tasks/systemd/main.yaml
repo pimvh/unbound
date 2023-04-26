@@ -61,7 +61,7 @@
       ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Edit systemd-resolved settings
-  template:
+  ansible.builtin.template:
     src: systemd/resolved.conf.j2
     dest: /etc/systemd/resolved.conf
     mode: u=rw,g=r,o=r

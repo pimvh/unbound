@@ -1,0 +1,19 @@
+---
+unbound_interfaces:
+  - "127.0.0.1"
+
+unbound_do_ipv6: "no"
+unbound_prefer_ipv6: "no"
+
+# Only give access to recursion clients from LAN IPs
+unbound_additional_access_controls:
+  - cidr_range: 10.0.0.0/8
+    action: allow
+  - cidr_range: 127.0.0.0/8
+    action: allow
+  - cidr_range: 127.0.0.1/32
+    action: allow
+  - cidr_range: 172.16.0.0/12
+    action: allow
+  - cidr_range: 192.168.0.0/16
+    action: allow
