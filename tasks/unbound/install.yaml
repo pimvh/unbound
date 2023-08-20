@@ -16,5 +16,5 @@
     name:
       - systemd-resolved
     state: present
-  when: unbound_install and ansible_facts['os_family'] == "Debian"
+  when: unbound_install and ansible_facts['distribution'] == "Debian"
   become: true
