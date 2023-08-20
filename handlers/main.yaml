@@ -6,6 +6,7 @@
     enabled: true
   become: true
   listen: "restart unbound"
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Restart and enable systemd-resolved service
   ansible.builtin.systemd:
@@ -14,7 +15,6 @@
     enabled: true
   become: true
   listen: "restart systemd-resolved"
-
 
 - name: Just force systemd to reread configs (2.4 and above)
   ansible.builtin.systemd:
