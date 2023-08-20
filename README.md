@@ -1,4 +1,5 @@
 ![Molecule test](https://github.com/pimvh/unbound/actions/workflows/test.yaml/badge.svg)
+
 # Requirements
 
 1. Ansible installed:
@@ -118,3 +119,7 @@ roles:
 
 - [Archlinux wiki on fetching root hints](https://wiki.archlinux.org/title/Unbound)
 - [calomel.org for unbound configuration template](https://calomel.org)
+
+# Future Improvements
+
+- correctly add systemd-resolved package
